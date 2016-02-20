@@ -58,6 +58,8 @@ case "$1" in
     status $prog
     ;;
   restart)
+    stop
+    start
     ;;
   *)
     echo $"Usage: $0 {start|stop|status|restart}"
