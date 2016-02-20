@@ -1,0 +1,6 @@
+#User location (one of states of Australia)
+LOCATION=NSW
+
+#Temperature in degrees 
+PARKER_TEMP=18
+SHORTS_TEMP=25
