@@ -26,3 +26,9 @@
 *.exe
 *.out
 *.app
+
+# IDE project files
+*.cbp
+/obj/
+*.depend
+/dinapd
