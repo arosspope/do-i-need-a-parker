@@ -27,22 +27,20 @@ int main(int argc, char *argv[])
   umask(0);             //Change the file mask
 
   //Setup Logging
-  setlogmask(LOG_UPTO(LOG_NOTICE));
-  openlog("dinapd", LOG_CONS | LOG_NDELAY | LOG_PERROR | LOG_PID, LOG_USER);
-  syslog(LOG_INFO, "Entering Daemon");
+  openlog("dinapd", LOG_NDELAY | LOG_PERROR | LOG_PID, LOG_DAEMON);
 
   //Create a new signature id for our child
   sid = setsid();
   if (sid < 0)
   {
-    syslog(LOG_ERR, "Unable to create SID");
+    syslog(LOG_MAKEPRI(LOG_DAEMON, LOG_ERR), "Unable to create SID");
     exit(EXIT_FAILURE);
   }
 
   //Change Directory
   if ((chdir("/")) < 0)
   {
-    syslog(LOG_ERR, "Unable to change working directory");
+    syslog(LOG_MAKEPRI(LOG_DAEMON, LOG_ERR), "Unable to change working directory");
     exit(EXIT_FAILURE);     //If we cant find the directory then we exit with error
   }
 
@@ -57,8 +55,8 @@ int main(int argc, char *argv[])
   //Execute the main process
   while(true)
   {
-    userSpecs.GetWeatherInfo();   //Execute the process
-    sleep((MINUTE * 1));          //Execute it every 1 minute (debug purposes)- TODO: Change to hourly rate
+    userSpecs.CheckWeatherInfo();   //Execute the process
+    sleep((MINUTE * 1));            //Execute it every 1 minute (debug purposes)- TODO: Change to hourly rate
   }
 
   closelog();               //Close the log
