@@ -29,12 +29,30 @@ DINAP::DINAP(TSTATE location=STATE_NSW, int parker_temp=18, int shorts_temp=25)
 
 void DINAP::CheckWeatherInfo(void)
 {
-  bool scrapeSucceeded;
-
-  //TODO: expand functionality
   syslog(LOG_MAKEPRI(LOG_DAEMON, LOG_NOTICE), "Checking the Weather... ");
-  scrapeSucceeded = DINAP::scrapeWeatherData();
+
+  if (!(DINAP::scrapeWeatherData()))
+  {
+    syslog(LOG_MAKEPRI(LOG_DAEMON, LOG_ERR), "Weather check failed.");
+  }
+  
 }
+
+int DINAP::convertTempString(std::string temp)
+{
+  /* If the corect information has been returned from the XML document, 
+   * temperature should be in the format "25° or 3°" for example.
+   */
+  if (temp.length() == 4 || temp.length() == 3) //This is factoring in the null byte
+  {
+    return atoi(temp.c_str());  //As we are expecting the above format, we only want to convert the front portion of the string
+  }
+  else
+  {
+    return -1;
+  }
+}
+  
 
 bool DINAP::scrapeWeatherData(void)
 {
@@ -42,12 +60,12 @@ bool DINAP::scrapeWeatherData(void)
     
   BomParser bomSpider = BomParser();
   
-  std::string scrapedTemp = bomSpider.GetWeatherInfo(STATE_NSW, INFO_Temp); //TEST CODE
+  std::string scrapedTemp = bomSpider.GetWeatherInfo(DINAP::location, INFO_Temp); //TEST CODE
 
   if (!scrapedTemp.empty())
-  {
+  {    
     syslog(LOG_MAKEPRI(LOG_DAEMON, LOG_INFO), scrapedTemp.c_str());
-    compareUserTemp(32);
+    compareUserTemp(scrapedTemp);
     scrapeOK = true;
   }
   else
@@ -83,9 +101,29 @@ void DINAP::notifyUser(const char * summary, const char * message)
   notify_uninit();
 }
 
-void DINAP::compareUserTemp(int scrapedTemp)
-{
-  DINAP::notifyUser("Weather is 17 degs", "Brrr it's chilly! Time for a coat.");    //TEST MESSAGE
+void DINAP::compareUserTemp(std::string scrapedTemp)
+{  
+  //Convert the temperature string into an integer  
+  int temp_int = DINAP::convertTempString(scrapedTemp);
+  
+  //Setup the notification messages
+  std::string summary = "It's " + scrapedTemp + "outside!";
+  std::string message = "It's quite nice outside, take it easy.";
+  
+  if (temp_int >= 0)  //The conversion worked
+  {
+    if (temp_int >= DINAP::shorts_temp)
+      message = "Crikey that's hot mate! Time to get your shorts on.";
+    
+    if (temp_int <= DINAP::parker_temp)
+      message = "Brrr, it's bloody cold outside. Get your parker on mate.";
+
+    DINAP::notifyUser(summary.c_str(), message.c_str()); //Send the notification
+  }
+  else
+  {
+    syslog(LOG_MAKEPRI(LOG_DAEMON, LOG_ERR), "Unable to convert string to integer.");
+  }  
 }
 /* END DINAP */
 /*!

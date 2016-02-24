@@ -32,7 +32,7 @@ private:
    *
    *  @return void
    */
-  void compareUserTemp(int scrapedTemp);
+  void compareUserTemp(std::string scrapedTemp);
 
   /*! @brief Sends Pop-up weather notifications
    *
@@ -42,6 +42,14 @@ private:
    *  @return void
    */
   void notifyUser(const char * summary, const char * message);
+  
+  /*! @brief Converts the temp string from the XML into an integer
+   *
+   *  @param temp - The string to convert.
+   *
+   *  @return int - The converted integer. Will return -1 if conversion failed.
+   */
+  int convertTempString(std::string temp);
 
 public:
   /*! @brief DINAP Constructor
