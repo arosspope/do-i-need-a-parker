@@ -11,18 +11,7 @@
 #define DINAP_H
 
 #include <string>
-
-typedef enum
-{
-  STATE_NSW,
-  STATE_ACT,
-  STATE_NT,
-  STATE_QLD,
-  STATE_SA,
-  STATE_TAS,
-  STATE_VIC,
-  STATE_WA
-} TSTATE;
+#include "types.h"
 
 class DINAP
 {
