@@ -23,8 +23,8 @@ start() {
   # Start our daemon
   echo -n $"Starting $prog: "
   
-  #Create my process and create the PID file
-  daemon --pidfile /var/run/${proc}.pid $DIR/$prog 
+  #Create my process and create the PID file, do it temporarily as non-root (the user who called this file)
+  su -c ". /etc/init.d/functions && daemon --pidfile /var/run/${proc}.pid $DIR/$prog" `logname`
   RETVAL=$?
   echo
   
