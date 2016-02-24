@@ -18,6 +18,7 @@
 #include <glib.h>
 #include <libnotify/notify.h>
 #include "DINAP.h"
+#include "bomparser.h"
 
 DINAP::DINAP(TSTATE location=STATE_NSW, int parker_temp=18, int shorts_temp=25)
 {
@@ -29,17 +30,32 @@ DINAP::DINAP(TSTATE location=STATE_NSW, int parker_temp=18, int shorts_temp=25)
 void DINAP::CheckWeatherInfo(void)
 {
   bool scrapeSucceeded;
+
   //TODO: expand functionality
   syslog(LOG_MAKEPRI(LOG_DAEMON, LOG_NOTICE), "Checking the Weather... ");
-
-  //TODO: Scrape weather information using location
   scrapeSucceeded = DINAP::scrapeWeatherData();
 }
 
 bool DINAP::scrapeWeatherData(void)
 {
-  DINAP::notifyUser("Weather is 17 degs", "Brrr it's chilly! Time for a coat.");    //TEST MESSAGE
-  return true;
+  bool scrapeOK = false;
+    
+  BomParser bomSpider = BomParser();
+  
+  std::string scrapedTemp = bomSpider.GetWeatherInfo(STATE_NSW, INFO_Temp); //TEST CODE
+
+  if (!scrapedTemp.empty())
+  {
+    syslog(LOG_MAKEPRI(LOG_DAEMON, LOG_INFO), scrapedTemp.c_str());
+    compareUserTemp(32);
+    scrapeOK = true;
+  }
+  else
+  {
+    syslog(LOG_MAKEPRI(LOG_DAEMON, LOG_ERR), "Unable to obtain weather information.");
+  }
+
+  return scrapeOK;
 }
 
 void DINAP::notifyUser(const char * summary, const char * message)
@@ -69,7 +85,7 @@ void DINAP::notifyUser(const char * summary, const char * message)
 
 void DINAP::compareUserTemp(int scrapedTemp)
 {
-
+  DINAP::notifyUser("Weather is 17 degs", "Brrr it's chilly! Time for a coat.");    //TEST MESSAGE
 }
 /* END DINAP */
 /*!
