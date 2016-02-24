@@ -16,15 +16,21 @@ prog=dinapd
 lockfile=/var/lock/subsys/$prog
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )" #The current working directory of the init script
 
+# Perform root check
+if [[ $EUID -ne 0 ]]; then
+  echo "You must be root to run this script ... exiting."
+  #exit 1
+fi
+
 start() {
   # Make some checks for requirements before continuing
-  [ -x $DIR/$prog ] || exit 5      #The Daemon executable should be with this script
+  [ -x ../$prog ] || exit 5      #The Daemon executable should be within the directory above
 
   # Start our daemon
   echo -n $"Starting $prog: "
   
-  #Create my process and create the PID file, do it temporarily as non-root (the user who called this file)
-  su -c ". /etc/init.d/functions && daemon --pidfile /var/run/${proc}.pid $DIR/$prog" `logname`
+  #Create my process and create the PID file
+  daemon --pidfile /var/run/${proc}.pid ../$prog
   RETVAL=$?
   echo
   

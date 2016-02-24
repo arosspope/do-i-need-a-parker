@@ -36,12 +36,25 @@ int main(int argc, char *argv[])
     syslog(LOG_MAKEPRI(LOG_DAEMON, LOG_ERR), "Unable to create SID");
     exit(EXIT_FAILURE);
   }
+  
+  //Drop superuser privileges in correct order
+  if (setgid(getgid()) == -1) 
+  {
+    syslog(LOG_MAKEPRI(LOG_DAEMON, LOG_ERR), "Unable to set group id");
+    exit(EXIT_FAILURE);
+  }
 
-  //Change Directory
+  if (setuid(getuid()) == -1)
+  {
+    syslog(LOG_MAKEPRI(LOG_DAEMON, LOG_ERR), "Unable to set user id");
+    exit(EXIT_FAILURE);
+  }  
+  
+  //Change to common working directory
   if ((chdir("/")) < 0)
   {
     syslog(LOG_MAKEPRI(LOG_DAEMON, LOG_ERR), "Unable to change working directory");
-    exit(EXIT_FAILURE);     //If we cant find the directory then we exit with error
+    exit(EXIT_FAILURE);
   }
 
   //Close Standard File Descriptors
