@@ -45,11 +45,12 @@ private:
   
   /*! @brief Converts the temp string from the XML into an integer
    *
-   *  @param temp - The string to convert.
+   *  @param temp_str - The string to convert.
+   *  @param temp_int - A pointer to the variable to store the converted string to int.
    *
-   *  @return int - The converted integer. Will return -1 if conversion failed.
+   *  @return TRUE - if conversion was successfull
    */
-  int convertTempString(std::string temp);
+  bool convertTempString(std::string temp_str, int *temp_int);
 
 public:
   /*! @brief DINAP Constructor
