@@ -13,19 +13,19 @@
 . dinap_config
 
 prog=dinapd
-lockfile=/var/lock/subsys/$prog
+lockfile=/tmp/$prog.lock
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )" #The current working directory of the init script
-
-# Perform root check
-if [[ $EUID -ne 0 ]]; then
-  echo "You must be root to run this script ... exiting."
-  #exit 1
-fi
 
 start() {
   # Make some checks for requirements before continuing
   [ -x ../$prog ] || exit 5      #The Daemon executable should be within the directory above
 
+  # Enforce that only one instance of the daemon is running
+  if ! mkdir $lockfile 2>/dev/null; then
+    echo "$prog is already running."
+    exit 1
+  fi  
+  
   # Start our daemon
   echo -n $"Starting $prog: "
   
@@ -34,8 +34,6 @@ start() {
   RETVAL=$?
   echo
   
-  # If all is well touch the lock file - Which ensures only one script is running at a time
-  [ $RETVAL -eq 0 ] && touch $lockfile   
   return $RETVAL
 }
 
@@ -48,7 +46,7 @@ stop() {
   echo
 
   # If all is well remove the lockfile
-  [ $RETVAL -eq 0 ] && rm -f $lockfile
+  [ $RETVAL -eq 0 ] && rm -r $lockfile 2>/dev/null
   return $RETVAL
 }
 
