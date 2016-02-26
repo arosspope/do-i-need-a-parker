@@ -17,9 +17,6 @@ lockfile=/tmp/$prog.lock
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )" #The current working directory of the init script
 
 start() {
-  # Make some checks for requirements before continuing
-  [ -x ../$prog ] || exit 5      #The Daemon executable should be within the directory above
-
   # Enforce that only one instance of the daemon is running
   if ! mkdir $lockfile 2>/dev/null; then
     echo "$prog is already running."
@@ -28,10 +25,14 @@ start() {
   
   # Start our daemon
   echo -n $"Starting $prog: "
+  echo
   
   #Create my process and create the PID file
   daemon --pidfile /var/run/${proc}.pid ../$prog
-  RETVAL=$?
+  RETVAL=$?  
+
+  #If the daemon is unable to run, remove the lockfile
+  [ $RETVAL -ne 0 ] && rm -r $lockfile 2>/dev/null
   echo
   
   return $RETVAL
