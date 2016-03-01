@@ -1,4 +1,5 @@
 #User location (one of states of Australia)
+#Possible locations: NSW, VIC, QLD, WA, SA, TAS, ACT, NT - Default to NSW
 LOCATION=NSW
 
 #Temperature in degrees 
