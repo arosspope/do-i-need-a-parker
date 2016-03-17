@@ -26,16 +26,16 @@ I use the below compiler options to build the project:
 Controlling the 'Do I need a Parker?' weather service is facilitated through the `dinapd_init.sh` script located in the scripts folder.
 
 Starting the service:
->$./dinapd_init.sh start
+>#./dinapd_init.sh start
 
 Stopping the service:
->$./dinapd_init.sh stop
+>#./dinapd_init.sh stop
 
 Restarting the service:
->$./dinapd_init.sh restart
+>#./dinapd_init.sh restart
 
 Obtaining the status of the service:
->$./dinapd_init.sh status
+>#./dinapd_init.sh status
 
 >dinapd (pid 2910) is running...
 
