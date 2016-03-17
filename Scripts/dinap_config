@@ -1,7 +1,8 @@
 #User location (one of states of Australia)
-#Possible locations: NSW, VIC, QLD, WA, SA, TAS, ACT, NT - Default to NSW
+#Possible locations: NSW, VIC, QLD, WA, SA, TAS, ACT, NT
+#Unkown locations will cause the daemon to not run.
 LOCATION=NSW
 
-#Temperature in degrees 
+#Temperature in degrees - USER Defined
 PARKER_TEMP=18
 SHORTS_TEMP=25
