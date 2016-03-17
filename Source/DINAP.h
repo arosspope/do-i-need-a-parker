@@ -41,7 +41,7 @@ private:
    *
    *  @return void
    */
-  void notifyUser(const char * summary, const char * message);
+  void notifyUser(std::string summary, std::string message);
   
   /*! @brief Converts the temp string from the XML into an integer
    *

@@ -79,17 +79,17 @@ bool DINAP::scrapeWeatherData(void)
   return rc;
 }
 
-void DINAP::notifyUser(const char * summary, const char * message)
+void DINAP::notifyUser(std::string summary, std::string message)
 {
   //Initialise the lib-notify handle
   notify_init("Do I need A Parker?");
 
   //Create the notification
   NotifyNotification * weatherUpdate;
-  weatherUpdate = notify_notification_new(summary, message, NULL);
+  weatherUpdate = notify_notification_new(summary.c_str(), message.c_str(), NULL);
 
-  //Set timeout - 3 seconds
-  notify_notification_set_timeout(weatherUpdate, 3000);
+  //Set timeout - 4 seconds
+  notify_notification_set_timeout(weatherUpdate, 4000);
 
   //Set the urgency level
   notify_notification_set_urgency(weatherUpdate, NOTIFY_URGENCY_NORMAL);
@@ -120,7 +120,7 @@ void DINAP::compareUserTemp(std::string scrapedTemp)
     if (temperature <= DINAP::parker_temp)
       message = "Brrr, it's bloody cold outside. Get your parker on mate.";
 
-    DINAP::notifyUser(summary.c_str(), message.c_str()); //Send the notification
+    DINAP::notifyUser(summary, message); //Send the notification
   }
 }
 /* END DINAP */
