@@ -25,6 +25,11 @@ typedef enum
   STATE_NT
 } TSTATE; /*!< TSTATE lists the states of Australia */
 
+typedef struct {
+  const char *stateName;
+  const TSTATE stateID;
+} state_collection_t;
+
 typedef enum
 {
   //Ensure numbering starts at 2, for easy XML schema parsing
