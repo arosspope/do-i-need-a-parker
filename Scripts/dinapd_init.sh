@@ -28,7 +28,7 @@ start() {
   echo
   
   #Create my process and create the PID file
-  daemon --pidfile /var/run/${proc}.pid ../$prog
+  daemon --pidfile /var/run/${proc}.pid ../$prog $LOCATION $PARKER_TEMP $SHORTS_TEMP
   RETVAL=$?  
 
   #If the daemon is unable to run, remove the lockfile
