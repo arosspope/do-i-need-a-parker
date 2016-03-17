@@ -8,13 +8,77 @@
 #include <syslog.h>
 #include <stdlib.h>
 #include "DINAP.h"
+#include "types.h"
 
 #define MINUTE 60 //60 seconds per minute
 
-using namespace std;
+const state_collection_t statesOfAus[] = {
+  {"NSW", STATE_NSW },
+  {"VIC", STATE_VIC },
+  {"QLD", STATE_QLD },
+  {"WA",  STATE_WA  },
+  {"SA",  STATE_SA  },
+  {"TAS", STATE_TAS },
+  {"ACT", STATE_ACT },
+  {"NT",  STATE_NT  }
+};
+
+/*! @brief Verifies and parses the command line arguments sent to the daemon.
+ *  
+ *  @param argc     - Number of arguments that daemon was called with.
+ *  @param argv     - Argument vectors.
+ *  @param stateID  - A pointer to a stateID, set via user config.
+ *  @param pTemp    - A pointer to optimal user parker temp, set via user config.
+ *  @param sTemp    - A pointer to optimal user shorts temp, set via user config.
+ *  
+ *  @return - True if all arguments were parsed correctly.
+ */
+bool verifyArguments(int argc, char *argv[], TSTATE * const stateID, int * const pTemp, int * const sTemp)
+{
+  int i;
+  bool rc = false;
+  int bufferSize = 5;
+  
+  if (argc == 4)
+  {
+    /* Loop through the states of australia and 
+     * attempt to get a match between the known 
+     * states and what is in the config file.
+     */
+    for(i = 0; i < sizeof(statesOfAus) / sizeof(state_collection_t); i++)
+    {
+      if (strncmp(statesOfAus[i].stateName, argv[1], bufferSize) == 0)
+      {
+        syslog(LOG_MAKEPRI(LOG_DAEMON, LOG_INFO), "Setting Location to: %s", argv[1]);      
+        *stateID = statesOfAus[i].stateID;
+        rc = true;
+        break;
+      }
+    }
+
+    //Attempt to convert the specified temps in the config file from string to int.
+    try {
+      *pTemp = std::stoi(argv[2], nullptr, 10); //Convert to decimal integer
+    } catch(const std::exception& e) {
+      syslog(LOG_MAKEPRI(LOG_DAEMON, LOG_ERR), "Unable to parse parker temp: %s.", argv[2]);
+      rc &= false;
+    }
+
+    try {
+      *sTemp = std::stoi(argv[3], nullptr, 10); //Convert to decimal integer
+    } catch(const std::exception& e) {
+      syslog(LOG_MAKEPRI(LOG_DAEMON, LOG_ERR), "Unable to parse shorts temp: %s.", argv[3]);
+      rc &= false;
+    }
+  }
+  
+  return rc;
+}
 
 int main(int argc, char *argv[])
 {
+  TSTATE stateID;
+  int parker_temp, shorts_temp; 
   pid_t pid, sid;
   pid = fork();         //Fork the parent process
 
@@ -61,15 +125,24 @@ int main(int argc, char *argv[])
   close(STDIN_FILENO);
   close(STDOUT_FILENO);
   close(STDERR_FILENO);
+  
+  //Validate command line arguments
+  if(verifyArguments(argc, argv, &stateID, &parker_temp, &shorts_temp))
+  {  
+    //Create a DINAP object 
+    DINAP userSpecs = DINAP(stateID, parker_temp, shorts_temp);
 
-  //Create a DINAP object
-  DINAP userSpecs = DINAP(STATE_NSW, 18, 25);   //TODO: Read these specs from command line arguments
-
-  //Execute the main process
-  while(true)
+    //Execute the main process
+    while(true)
+    {
+      userSpecs.CheckWeatherInfo();   //Execute the process
+      sleep((MINUTE * 60));           //Execute it every hour
+    }
+  }
+  else
   {
-    userSpecs.CheckWeatherInfo();   //Execute the process
-    sleep((MINUTE * 1));            //Execute it every 1 minute (debug purposes)- TODO: Change to hourly rate
+    syslog(LOG_MAKEPRI(LOG_DAEMON, LOG_ERR), "Unable to verify DINAPD config. Terminating.");
+    exit(EXIT_FAILURE);
   }
 
   closelog();               //Close the log
